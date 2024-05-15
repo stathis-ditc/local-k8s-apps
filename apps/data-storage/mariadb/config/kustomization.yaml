@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- backup.yaml
+- mariabackup-pvc.yaml
+- mariadb-configmap.yaml
+- mariadb-my-cnf-configmap.yaml
+- mariadb-secret.yaml
+- owncloud-secret.yaml

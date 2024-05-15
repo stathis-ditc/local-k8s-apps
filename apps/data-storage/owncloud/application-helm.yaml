@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: owncloud
+  namespace: argocd
+spec:
+  project: owncloud-helm-charts
+  source:
+    chart: owncloud
+    repoURL: https://owncloud-docker.github.io/helm-charts
+    targetRevision: v0.8.0
+    helm:
+      releaseName: owncloud
+      values: |-
+        image:
+          tag: 10.14.0
+        autoscaling:
+          enabled: true
+          minReplicas: 3
+          maxReplicas: 6
+        service: 
+          type: ClusterIP
+        owncloud:  
+          db:
+            host: "mariadb.data-storage.svc.cluster.local"
+            name: "owncloud"
+            password: "replace-me"
+            type: "mysql"
+            username: "owncloud"
+          redis:
+            enabled: "true"
+            host: "redis-master.data-storage.svc.cluster.local"
+            password: "12345"
+            failoverMode: "FAILOVER_DISTRIBUTE"
+          trustedDomains:
+          - localhost
+          - owncloud.ditc.lcldns
+          - tailscale-tls-gateway-proxy.tail983d7.ts.net
+        persistence:
+          owncloud:
+            size: 1500Gi
+            nfs:
+              server: 10.54.42.102
+              path: /
+            storageClassName: nfs-client
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: data-storage
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tailscale-subnet-router
+  namespace: connectivity
+  labels:
+    app: tailscale-subnet-router
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tailscale-subnet-router
+  template:
+    metadata:
+      labels:
+        name: tailscale-subnet-router
+    spec:
+      serviceAccountName: "tailscale"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - ditc-k8s-master
+                      - ditc-k8s-worker2
+      containers:
+        - name: tailscale
+          imagePullPolicy: Always
+          image: "ghcr.io/tailscale/tailscale:v1.58.2"
+          ports:
+            - containerPort: 8088
+          env:
+            # Store the state in a k8s secret
+            - name: TS_KUBE_SECRET
+              value: "tailscale-subnet-router"
+            - name: TS_USERSPACE
+              value: "true"
+            - name: TS_HOSTNAME
+              value: "tailscale-subnet-router"
+            - name: TS_ACCEPT_DNS
+              value: "true"
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-auth
+                  key: TS_AUTHKEY
+                  optional: true
+            - name: TS_ROUTES
+              value: "10.54.42.150/32"
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000

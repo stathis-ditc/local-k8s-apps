@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: argocd
+spec:
+  project: vault-helm-charts
+  source:
+    chart: vault
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: 0.25.0
+    helm:
+      releaseName: vault
+      values: |-
+        server:
+          affinity: ""
+          ha:
+            enabled: true
+            raft:
+              enabled: true
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: security
+  syncPolicy:
+    automated:
+      selfHeal: false
+      prune: true

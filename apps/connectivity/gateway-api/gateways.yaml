@@ -1,0 +1,54 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: tls-gateway
+  namespace: connectivity
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: https-internal
+      port: 443
+      protocol: HTTPS
+      hostname: "*.ditc.lcldns"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              shared-gateway-access: "true"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: ditc-certificate-secret
+            kind: Secret
+#---
+#apiVersion: gateway.networking.k8s.io/v1
+#kind: Gateway
+#metadata:
+#  name: tcp-udp-gateway
+#  namespace: connectivity
+#spec:
+#  gatewayClassName: cilium
+#  listeners:
+#    - name: pihole-dns-tcp
+#      protocol: TCP
+#      port: 53
+#      allowedRoutes:
+#        kinds:
+#          - kind: TCPRoute
+#        namespaces:
+#          from: Selector
+#          selector:
+#            matchLabels:
+#              name: "connectivity"
+#    - name: pihole-dns-udp
+#      protocol: UDP
+#      port: 53
+#      allowedRoutes:
+#        kinds:
+#          - kind: UDPRoute
+#        namespaces:
+#          from: Selector
+#          selector:
+#            matchLabels:
+#              name: "connectivity"

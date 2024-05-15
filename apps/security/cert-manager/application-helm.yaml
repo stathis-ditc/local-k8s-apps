@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  project: cert-manager-helm-charts
+  source:
+    chart: cert-manager
+    repoURL: https://charts.jetstack.io
+    targetRevision: 1.12.4
+    helm:
+      releaseName: kube-prometheus-stack
+      values: |-
+        namespace: pki
+        installCRDs: true
+        featureGates: "ExperimentalGatewayAPISupport=true"
+        prometheus:
+          enabled: true
+          servicemonitor:
+            enabled: true
+            prometheusInstance: kube-prometheus-stack
+            labels:
+              release: kube-prometheus-stack
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: pki
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+    automated:
+      selfHeal: true
+      prune: true

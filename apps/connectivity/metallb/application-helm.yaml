@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: argocd
+spec:
+  project: metallb-helm-charts
+  source:
+    chart: metallb
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 5.0.0
+    helm:
+      releaseName: metallb
+      values: |-
+        prometheusRule:
+          enabled: true
+        controller: 
+          metrics: 
+            enabled: true
+            serviceMonitor: 
+              enabled: true
+              namespace: observability
+        speaker: 
+          metrics: 
+            enabled: true
+            serviceMonitor: 
+              enabled: true
+              namespace: observability
+
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: connectivity
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

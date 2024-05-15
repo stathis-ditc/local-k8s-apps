@@ -1,0 +1,94 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: owncloud-internal
+  namespace: data-storage
+spec:
+  parentRefs:
+    - name: tls-gateway
+      namespace: connectivity
+  hostnames:
+    - "owncloud.ditc.lcldns"
+  rules:
+    - backendRefs:
+        - kind: Service
+          name: owncloud
+          namespace: data-storage
+          port: 8080
+
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana-internal-routes
+  namespace: observability
+spec:
+  parentRefs:
+    - name: tls-gateway
+      namespace: connectivity
+  hostnames:
+    - "grafana.ditc.lcldns"
+  rules:
+    - backendRefs:
+        - kind: Service
+          name: kube-prometheus-stack-grafana
+          namespace: observability
+          port: 80
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-internal-routes
+  namespace: argocd
+spec:
+  parentRefs:
+    - name: tls-gateway
+      namespace: connectivity
+  hostnames:
+    - "argocd.ditc.lcldns"
+  rules:
+    - backendRefs:
+        - kind: Service
+          name: argocd-server
+          namespace: argocd
+          port: 80
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hubble-ui-internal-routes
+  namespace: kube-system
+spec:
+  parentRefs:
+    - name: tls-gateway
+      namespace: connectivity
+  hostnames:
+    - "hubble.ditc.lcldns"
+  rules:
+    - backendRefs:
+        - kind: Service
+          name: hubble-ui
+          namespace: kube-system
+          port: 80
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vault-ui-internal-routes
+  namespace: security
+spec:
+  parentRefs:
+    - name: tls-gateway
+      namespace: connectivity
+  hostnames:
+    - "vault.ditc.lcldns"
+  rules:
+    - backendRefs:
+        - kind: Service
+          name: vault
+          namespace: security
+          port: 8200

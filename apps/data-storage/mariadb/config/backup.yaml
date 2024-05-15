@@ -1,0 +1,26 @@
+apiVersion: mariadb.mmontes.io/v1alpha1
+kind: Backup
+metadata:
+  name: mariadb-backup
+  namespace: data-storage
+spec:
+  mariaDbRef:
+    name: mariadb
+  schedule:
+    cron: "0 */6 * * *"
+    suspend: false
+  storage:
+    volume:
+      nfs:
+        server: 10.54.42.102
+        path: /mnt/md0/backups/mariadb/
+  args:
+    - --single-transaction
+    - --all-databases
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi

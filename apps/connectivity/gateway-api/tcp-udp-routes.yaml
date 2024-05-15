@@ -1,0 +1,30 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: pihole-dns-tcp
+  namespace: connectivity
+spec:
+  parentRefs:
+    - name: tcp-udp-gateway
+      namespace: connectivity
+      sectionName: pihole-dns-tcp
+  rules:
+    - backendRefs:
+        - name: pihole-dns-tcp
+          port: 53
+
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: pihole-dns-udp
+  namespace: connectivity
+spec:
+  parentRefs:
+    - name: tcp-udp-gateway
+      namespace: connectivity
+      sectionName: pihole-dns-udp
+  rules:
+    - backendRefs:
+        - name: pihole-dns-udp
+          port: 53

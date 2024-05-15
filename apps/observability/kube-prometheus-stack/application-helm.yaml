@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: prometheus-community-helm-charts
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 56.6.2
+    helm:
+      releaseName: kube-prometheus-stack
+      values: |-
+        prometheus-node-exporter:
+           hostRootFsMount:
+             enabled: false
+        prometheusOperator:
+           admissionWebhooks:
+             failurePolicy: Ignore
+        grafana:
+          grafana.ini:
+            server: 
+              root_url: https://grafana.ditc.lcldns/
+          additionalDataSources:
+          - name: MasterPi
+            type: influxdb
+            access: proxy
+            editable: false
+            jsonData:
+              version: Flux
+              organization: some-org
+              defaultBucket: rasppi
+              tlsSkipVerify: true
+            secureJsonData:
+              token: replace-in-base64
+            url: http://10.54.42.101:8086
+          - name: WorkerPi1
+            type: influxdb
+            access: proxy
+            jsonData:
+              version: Flux
+              organization: some-org
+              defaultBucket: rasppi
+              tlsSkipVerify: true
+            secureJsonData:
+              token: replace-me-in-base64 
+            url: http://10.54.42.102:8086
+          - name: WorkerPi2
+            type: influxdb
+            access: proxy
+            jsonData:
+              version: Flux
+              organization: some-org
+              defaultBucket: rasppi
+              tlsSkipVerify: true
+            secureJsonData:
+              token: replace-in-base64
+            url: http://10.54.42.103:8086
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: observability
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+    automated:
+      selfHeal: true
+      prune: true

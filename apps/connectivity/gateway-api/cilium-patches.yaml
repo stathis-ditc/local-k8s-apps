@@ -1,0 +1,5 @@
+- op: add
+  path: "/metadata/annotations"
+  value:
+    metallb.universe.tf/ip-allocated-from-pool: load-balancer
+    metallb.universe.tf/loadBalancerIPs: 10.54.42.155

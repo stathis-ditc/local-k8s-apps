@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: traefik-helm-charts
+  source:
+    chart: traefik
+    repoURL: https://traefik.github.io/charts
+    targetRevision: 24.0.0
+    helm:
+      releaseName: traefik
+      values: |-
+        commonLabels:
+          gatewayclass.dict.io/type: cilium
+        additionalArguments:
+          - "--providers.kubernetesgateway.labelselector=gatewayclass.dict.io/type=cilium"
+        service:
+          annotations:
+            metallb.universe.tf/loadBalancerIPs: 10.54.42.156
+        ports:
+          traefik:
+            expose: true
+        deployment:
+          enabled: true
+          kind: DaemonSet
+        experimental:
+          kubernetesGateway:
+            enabled: false
+            gateway:
+              enabled: false
+        resources:
+          requests:
+            cpu: "300m"
+            memory: "200Mi"
+          limits:
+            memory: "200Mi"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: connectivity
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
